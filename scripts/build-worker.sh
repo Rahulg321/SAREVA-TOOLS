@@ -7,6 +7,9 @@ if [[ -f "${HOME}/.cargo/env" ]]; then
 fi
 export PATH="${HOME}/.cargo/bin:${PATH}"
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
 if [[ "${WORKER_BUILD_SKIP:-0}" == "1" ]]; then
   echo "[build-worker] Skipping (WORKER_BUILD_SKIP=1)"
   exit 0
@@ -30,4 +33,4 @@ if ! command -v worker-build >/dev/null 2>&1; then
 fi
 
 log "Running worker-build --release..."
-exec worker-build --release -- -v
+exec worker-build --release
