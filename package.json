@@ -1,0 +1,11 @@
+{
+  "name": "finance-tools",
+  "private": true,
+  "scripts": {
+    "build:worker": "bash scripts/build-worker.sh",
+    "deploy": "bash scripts/cloudflare-deploy.sh"
+  },
+  "devDependencies": {
+    "wrangler": "4.144.0"
+  }
+}
