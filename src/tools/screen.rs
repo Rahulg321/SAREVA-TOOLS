@@ -5,6 +5,28 @@ use crate::error::ApiError;
 
 #[derive(Deserialize)]
 pub struct Input {
+    pub mandate: Mandate,
+    pub deal: Deal,
+}
+
+#[derive(Deserialize, Default)]
+pub struct Mandate {
+    #[serde(default)]
+    pub revenue_min: Option<f64>,
+    #[serde(default)]
+    pub revenue_max: Option<f64>,
+    #[serde(default)]
+    pub ebitda_min: Option<f64>,
+    #[serde(default)]
+    pub min_ebitda_margin: Option<f64>,
+    #[serde(default)]
+    pub min_growth: Option<f64>,
+    #[serde(default)]
+    pub max_net_debt_to_ebitda: Option<f64>,
+}
+
+#[derive(Deserialize)]
+pub struct Deal {
     pub revenue: f64,
     pub ebitda: f64,
     pub growth: f64,
@@ -12,87 +34,149 @@ pub struct Input {
 }
 
 #[derive(Serialize)]
-pub struct Breakdown {
-    pub profitability: u32,
-    pub growth: u32,
-    pub leverage: u32,
+pub struct Criterion {
+    pub label: String,
+    pub deal_value: f64,
+    pub format: &'static str,
+    pub requirement: String,
+    pub passed: bool,
 }
 
 #[derive(Serialize)]
 pub struct Output {
-    pub ebitda_margin: f64,
-    pub debt_to_ebitda: f64,
-    pub score: u32,
     pub qualified: bool,
-    pub breakdown: Breakdown,
+    pub passed: u32,
+    pub total: u32,
+    pub ebitda_margin: f64,
+    pub net_debt_to_ebitda: f64,
+    pub criteria: Vec<Criterion>,
 }
 
 pub async fn handler(Json(input): Json<Input>) -> Result<Json<Output>, ApiError> {
-    calculate(&input).map(Json).map_err(ApiError::bad_request)
+    evaluate(&input).map(Json).map_err(ApiError::bad_request)
 }
 
-pub fn calculate(input: &Input) -> Result<Output, String> {
-    if input.revenue <= 0.0 {
+pub fn evaluate(input: &Input) -> Result<Output, String> {
+    let deal = &input.deal;
+    if deal.revenue <= 0.0 {
         return Err("revenue must be greater than 0".into());
     }
-    if input.ebitda == 0.0 {
+    if deal.ebitda == 0.0 {
         return Err("ebitda must be non-zero".into());
     }
 
-    let ebitda_margin = input.ebitda / input.revenue;
-    let debt_to_ebitda = input.debt / input.ebitda;
+    let ebitda_margin = deal.ebitda / deal.revenue;
+    let net_debt_to_ebitda = deal.debt / deal.ebitda;
+    let m = &input.mandate;
+    let mut criteria = Vec::new();
 
-    let breakdown = Breakdown {
-        profitability: score_profitability(ebitda_margin),
-        growth: score_growth(input.growth),
-        leverage: score_leverage(debt_to_ebitda),
-    };
-    let score = breakdown.profitability + breakdown.growth + breakdown.leverage;
+    if let Some(min) = m.revenue_min {
+        criteria.push(criterion(
+            "Revenue",
+            deal.revenue,
+            "money",
+            format!(">= {}", money(min)),
+            deal.revenue >= min,
+        ));
+    }
+    if let Some(max) = m.revenue_max {
+        criteria.push(criterion(
+            "Revenue",
+            deal.revenue,
+            "money",
+            format!("<= {}", money(max)),
+            deal.revenue <= max,
+        ));
+    }
+    if let Some(min) = m.ebitda_min {
+        criteria.push(criterion(
+            "EBITDA",
+            deal.ebitda,
+            "money",
+            format!(">= {}", money(min)),
+            deal.ebitda >= min,
+        ));
+    }
+    if let Some(min) = m.min_ebitda_margin {
+        criteria.push(criterion(
+            "EBITDA margin",
+            ebitda_margin,
+            "percent",
+            format!(">= {}", percent(min)),
+            ebitda_margin >= min,
+        ));
+    }
+    if let Some(min) = m.min_growth {
+        criteria.push(criterion(
+            "Revenue growth",
+            deal.growth,
+            "percent",
+            format!(">= {}", percent(min)),
+            deal.growth >= min,
+        ));
+    }
+    if let Some(max) = m.max_net_debt_to_ebitda {
+        criteria.push(criterion(
+            "Net debt / EBITDA",
+            net_debt_to_ebitda,
+            "multiple",
+            format!("<= {max:.1}x"),
+            net_debt_to_ebitda <= max,
+        ));
+    }
+
+    let passed = criteria.iter().filter(|c| c.passed).count() as u32;
 
     Ok(Output {
+        qualified: criteria.iter().all(|c| c.passed),
+        passed,
+        total: criteria.len() as u32,
         ebitda_margin,
-        debt_to_ebitda,
-        score,
-        qualified: score >= 70 && debt_to_ebitda <= 4.0 && ebitda_margin >= 0.10,
-        breakdown,
+        net_debt_to_ebitda,
+        criteria,
     })
 }
 
-fn score_profitability(margin: f64) -> u32 {
-    match margin {
-        m if m >= 0.20 => 40,
-        m if m >= 0.15 => 30,
-        m if m >= 0.10 => 20,
-        m if m >= 0.05 => 10,
-        _ => 0,
+fn criterion(
+    label: &str,
+    deal_value: f64,
+    format: &'static str,
+    requirement: String,
+    passed: bool,
+) -> Criterion {
+    Criterion {
+        label: label.into(),
+        deal_value,
+        format,
+        requirement,
+        passed,
     }
 }
 
-fn score_growth(growth: f64) -> u32 {
-    match growth {
-        g if g >= 0.20 => 30,
-        g if g >= 0.10 => 20,
-        g if g >= 0.05 => 10,
-        _ => 0,
+fn money(value: f64) -> String {
+    let abs = value.abs();
+    let sign = if value < 0.0 { "-" } else { "" };
+    if abs >= 1e9 {
+        format!("{sign}${:.2}B", abs / 1e9)
+    } else if abs >= 1e6 {
+        format!("{sign}${:.1}M", abs / 1e6)
+    } else if abs >= 1e3 {
+        format!("{sign}${:.1}K", abs / 1e3)
+    } else {
+        format!("{sign}${abs:.0}")
     }
 }
 
-fn score_leverage(debt_to_ebitda: f64) -> u32 {
-    match debt_to_ebitda {
-        d if d <= 1.0 => 30,
-        d if d <= 2.0 => 25,
-        d if d <= 3.0 => 15,
-        d if d <= 4.0 => 5,
-        _ => 0,
-    }
+fn percent(value: f64) -> String {
+    format!("{:.1}%", value * 100.0)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    fn example() -> Input {
-        Input {
+    fn deal() -> Deal {
+        Deal {
             revenue: 50_000_000.0,
             ebitda: 11_000_000.0,
             growth: 0.25,
@@ -100,29 +184,106 @@ mod tests {
         }
     }
 
+    fn sample_mandate() -> Mandate {
+        Mandate {
+            revenue_min: Some(10_000_000.0),
+            revenue_max: Some(100_000_000.0),
+            ebitda_min: Some(5_000_000.0),
+            min_ebitda_margin: Some(0.10),
+            min_growth: Some(0.05),
+            max_net_debt_to_ebitda: Some(4.0),
+        }
+    }
+
     #[test]
-    fn example_matches_rubric() {
-        let result = calculate(&example()).unwrap();
+    fn deal_passes_all_criteria() {
+        let result = evaluate(&Input {
+            mandate: sample_mandate(),
+            deal: deal(),
+        })
+        .unwrap();
+        assert!(result.qualified);
+        assert_eq!(result.total, 6);
+        assert_eq!(result.passed, 6);
         assert!((result.ebitda_margin - 0.22).abs() < 1e-9);
-        assert!((result.debt_to_ebitda - 1.8181818).abs() < 1e-4);
-        assert_eq!(result.score, 95);
+    }
+
+    #[test]
+    fn fails_on_margin_when_below_mandate() {
+        let result = evaluate(&Input {
+            mandate: sample_mandate(),
+            deal: Deal {
+                ebitda: 3_000_000.0,
+                ..deal()
+            },
+        })
+        .unwrap();
+        assert!(!result.qualified);
+        let margin = result
+            .criteria
+            .iter()
+            .find(|c| c.label == "EBITDA margin")
+            .unwrap();
+        assert!(!margin.passed);
+        assert_eq!(margin.requirement, ">= 10.0%");
+    }
+
+    #[test]
+    fn fails_on_leverage() {
+        let result = evaluate(&Input {
+            mandate: sample_mandate(),
+            deal: Deal {
+                debt: 60_000_000.0,
+                ..deal()
+            },
+        })
+        .unwrap();
+        assert!(!result.qualified);
+        assert!(result.criteria.iter().any(|c| !c.passed));
+    }
+
+    #[test]
+    fn only_applied_criteria_are_evaluated() {
+        let result = evaluate(&Input {
+            mandate: Mandate {
+                max_net_debt_to_ebitda: Some(3.0),
+                ..Default::default()
+            },
+            deal: deal(),
+        })
+        .unwrap();
+        assert_eq!(result.total, 1);
         assert!(result.qualified);
     }
 
     #[test]
-    fn weak_company_fails() {
-        let weak = Input {
-            revenue: 100_000_000.0,
-            ebitda: 3_000_000.0,
-            growth: -0.10,
-            debt: 30_000_000.0,
-        };
-        assert!(!calculate(&weak).unwrap().qualified);
+    fn empty_mandate_qualifies() {
+        let result = evaluate(&Input {
+            mandate: Mandate::default(),
+            deal: deal(),
+        })
+        .unwrap();
+        assert!(result.qualified);
+        assert_eq!(result.total, 0);
     }
 
     #[test]
-    fn rejects_bad_input() {
-        assert!(calculate(&Input { revenue: 0.0, ..example() }).is_err());
-        assert!(calculate(&Input { ebitda: 0.0, ..example() }).is_err());
+    fn rejects_bad_deal() {
+        assert!(evaluate(&Input {
+            mandate: Mandate::default(),
+            deal: Deal {
+                revenue: 0.0,
+                ..deal()
+            }
+        })
+        .is_err());
+        assert!(evaluate(&Input {
+            mandate: Mandate::default(),
+            deal: Deal {
+                ebitda: 0.0,
+                ..deal()
+            }
+        })
+        .is_err());
     }
 }

@@ -23,41 +23,64 @@
         <a class="link" href="/">&larr; All tools</a>
       </div>
     </header>
+    <p class="lead">Screen a deal against your firm's investment mandate. The mandate is saved in this browser.</p>
 
-    <form id="screener">
-      <label>Company name
-        <input id="name" type="text" value="Acme Corp" />
+    <ol class="steps">
+      <li id="tab-1" class="step-tab active">1 · Mandate</li>
+      <li id="tab-2" class="step-tab">2 · Deal</li>
+    </ol>
+
+    <form id="mandate" class="step-panel">
+      <label>Revenue minimum ($)
+        <input name="revenue_min" type="number" step="any" placeholder="Any" />
       </label>
-      <label>Revenue ($)
-        <input id="revenue" type="number" step="any" value="50000000" required />
+      <label>Revenue maximum ($)
+        <input name="revenue_max" type="number" step="any" placeholder="Any" />
       </label>
-      <label>EBITDA ($)
-        <input id="ebitda" type="number" step="any" value="11000000" required />
+      <label>Minimum EBITDA ($)
+        <input name="ebitda_min" type="number" step="any" placeholder="Any" />
       </label>
-      <label>Growth (%)
-        <input id="growth" type="number" step="any" value="25" required />
+      <label>Minimum EBITDA margin (%)
+        <input name="min_ebitda_margin" type="number" step="any" value="10" />
       </label>
-      <label>Debt ($)
-        <input id="debt" type="number" step="any" value="20000000" required />
+      <label>Minimum revenue growth (%)
+        <input name="min_growth" type="number" step="any" value="5" />
       </label>
-      <button type="submit">Screen</button>
+      <label>Maximum net debt / EBITDA (x)
+        <input name="max_net_debt_to_ebitda" type="number" step="any" value="4" />
+      </label>
+      <div class="actions">
+        <button type="submit">Save &amp; continue</button>
+        <button type="button" id="reset-mandate" class="secondary">Reset defaults</button>
+      </div>
     </form>
 
-    <section id="result" hidden>
-      <h2 class="eyebrow">Result</h2>
-      <dl>
-        <dt>Revenue</dt><dd id="r-revenue">&mdash;</dd>
-        <dt>EBITDA margin</dt><dd id="r-margin">&mdash;</dd>
-        <dt>Debt / EBITDA</dt><dd id="r-leverage">&mdash;</dd>
-        <dt>Score</dt><dd id="r-score">&mdash;</dd>
-        <dt>Verdict</dt><dd id="r-verdict">&mdash;</dd>
-      </dl>
-    </section>
+    <form id="deal" class="step-panel" hidden>
+      <label>Company name
+        <input name="name" type="text" value="Acme Corp" />
+      </label>
+      <label>Revenue ($)
+        <input name="revenue" type="number" step="any" value="50000000" required />
+      </label>
+      <label>EBITDA ($)
+        <input name="ebitda" type="number" step="any" value="11000000" required />
+      </label>
+      <label>Growth (%)
+        <input name="growth" type="number" step="any" value="25" required />
+      </label>
+      <label>Debt ($)
+        <input name="debt" type="number" step="any" value="20000000" required />
+      </label>
+      <div class="actions">
+        <button type="submit">Screen deal</button>
+        <button type="button" id="edit-mandate" class="secondary">Edit mandate</button>
+      </div>
+    </form>
 
+    <section id="result" hidden></section>
     <p id="error" class="error" hidden></p>
   </main>
 
   <script src="/app.js"></script>
-  <footer class="site-footer"><a href="/">Sareva Finance Tools</a><span>tools.sareva.in</span></footer>
 </body>
 </html>
