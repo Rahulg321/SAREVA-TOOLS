@@ -27,8 +27,33 @@ pub async fn complete_json<T: DeserializeOwned>(
     max_tokens: u32,
 ) -> Result<T, String> {
     let raw = complete(env, system, user, max_tokens).await?;
-    serde_json::from_str::<T>(strip_fences(&raw))
-        .map_err(|e| format!("model returned invalid JSON: {e}"))
+    parse_lenient(&raw)
+}
+
+/// Parse model output leniently: strip code fences, then drop `null` values so
+/// they fall through to `#[serde(default)]` instead of failing deserialization.
+fn parse_lenient<T: DeserializeOwned>(raw: &str) -> Result<T, String> {
+    let mut value: serde_json::Value = serde_json::from_str(strip_fences(raw))
+        .map_err(|e| format!("model returned invalid JSON: {e}"))?;
+    strip_nulls(&mut value);
+    serde_json::from_value(value).map_err(|e| format!("model returned invalid JSON: {e}"))
+}
+
+fn strip_nulls(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(map) => {
+            map.retain(|_, v| !v.is_null());
+            for v in map.values_mut() {
+                strip_nulls(v);
+            }
+        }
+        serde_json::Value::Array(items) => {
+            for item in items.iter_mut() {
+                strip_nulls(item);
+            }
+        }
+        _ => {}
+    }
 }
 
 fn backend(env: &Env) -> String {
@@ -164,4 +189,48 @@ fn strip_fences(raw: &str) -> &str {
         .strip_suffix("```")
         .unwrap_or(without_open)
         .trim()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(serde::Deserialize)]
+    struct Sample {
+        #[serde(default)]
+        company_name: String,
+        #[serde(default)]
+        risks: Vec<String>,
+        #[serde(default)]
+        questions: Vec<Inner>,
+    }
+
+    #[derive(serde::Deserialize)]
+    struct Inner {
+        #[serde(default)]
+        category: String,
+    }
+
+    #[test]
+    fn tolerates_null_fields() {
+        // The model sometimes emits explicit nulls for arrays/strings.
+        let parsed: Sample =
+            parse_lenient(r#"{"company_name": null, "risks": null, "questions": null}"#).unwrap();
+        assert_eq!(parsed.company_name, "");
+        assert!(parsed.risks.is_empty());
+        assert!(parsed.questions.is_empty());
+    }
+
+    #[test]
+    fn strips_fences_and_nested_nulls() {
+        let raw = "```json\n{\"questions\": [{\"category\": null, \"extra\": 1}]}\n```";
+        let parsed: Sample = parse_lenient(raw).unwrap();
+        assert_eq!(parsed.questions.len(), 1);
+        assert_eq!(parsed.questions[0].category, "");
+    }
+
+    #[test]
+    fn still_reports_genuinely_invalid_json() {
+        assert!(parse_lenient::<Sample>("not json at all").is_err());
+    }
 }

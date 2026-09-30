@@ -13,13 +13,21 @@ pub struct Input {
 
 #[derive(Serialize, Deserialize)]
 pub struct Memo {
+    #[serde(default)]
     pub company_overview: String,
+    #[serde(default)]
     pub revenue_ebitda_trends: String,
+    #[serde(default)]
     pub growth_rates: String,
+    #[serde(default)]
     pub key_risks: Vec<String>,
+    #[serde(default)]
     pub investment_highlights: Vec<String>,
+    #[serde(default)]
     pub management_questions: Vec<String>,
+    #[serde(default)]
     pub investment_thesis: String,
+    #[serde(default)]
     pub ic_summary: String,
 }
 

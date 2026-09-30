@@ -13,7 +13,9 @@ pub struct Input {
 
 #[derive(Serialize, Deserialize)]
 pub struct Output {
+    #[serde(default)]
     pub formula: String,
+    #[serde(default)]
     pub explanation: String,
 }
 

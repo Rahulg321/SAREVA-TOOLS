@@ -13,10 +13,15 @@ pub struct Input {
 
 #[derive(Serialize, Deserialize)]
 pub struct Question {
+    #[serde(default)]
     pub category: String,
+    #[serde(default)]
     pub question: String,
+    #[serde(default)]
     pub why: String,
+    #[serde(default)]
     pub evidence: String,
+    #[serde(default)]
     pub priority: String,
 }
 

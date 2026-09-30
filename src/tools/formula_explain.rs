@@ -13,8 +13,11 @@ pub struct Input {
 
 #[derive(Serialize, Deserialize)]
 pub struct Output {
+    #[serde(default)]
     pub name: String,
+    #[serde(default)]
     pub explanation: String,
+    #[serde(default)]
     pub finance_interpretation: String,
 }
 
