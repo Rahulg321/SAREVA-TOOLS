@@ -72,6 +72,18 @@
       name: "CIM → Investment Questions",
       blurb: "Grouped due-diligence questions from a CIM.",
     },
+    {
+      href: "/cim-snapshot",
+      tag: "AI",
+      name: "CIM → Deal Snapshot",
+      blurb: "Drop a CIM, get metrics, risks and an initial screen.",
+    },
+    {
+      href: "/memo",
+      tag: "AI",
+      name: "Investment Memo Generator",
+      blurb: "Description + financials to a one-page IC memo.",
+    },
   ];
 
   document.addEventListener("DOMContentLoaded", () => {

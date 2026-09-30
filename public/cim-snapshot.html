@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Formula Explainer · Sareva Finance Tools</title>
+  <title>CIM → Deal Snapshot · Sareva Finance Tools</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -16,17 +16,21 @@
     <header>
       <div>
         <p class="eyebrow">AI</p>
-        <h1>Formula Explainer</h1>
+        <h1>CIM → Deal Snapshot</h1>
       </div>
       <a class="link" href="/">&larr; All tools</a>
     </header>
-    <p class="lead">Paste a spreadsheet formula and get a plain-English explanation.</p>
+    <p class="lead">Drop a CIM (or paste text) for a one-screen deal snapshot. Ratios are computed in Rust; the model only extracts the raw facts. The file stays in your browser.</p>
 
-    <form id="tool" data-endpoint="/api/formula-explain">
-      <label>Formula
-        <textarea name="formula" rows="3" spellcheck="false">=IFERROR((E27-D27)/D27,0)</textarea>
+    <form id="tool" data-endpoint="/api/cim-snapshot">
+      <label>Upload a CIM (PDF)
+        <input type="file" accept="application/pdf" data-pdf />
+        <span id="file-status" class="hint">Text-based PDFs only.</span>
       </label>
-      <button type="submit">Explain</button>
+      <label>CIM text
+        <textarea name="text" rows="8" spellcheck="false">Paste the company description, financials and notes here. Example: B2B SaaS, US/Europe, 320 employees, recurring revenue, revenue $84.2M growing 21%, EBITDA $16.8M (20% margin), net debt $31M, top 10 customers 42% of revenue, DSO up 18% over two years.</textarea>
+      </label>
+      <button type="submit">Build snapshot</button>
     </form>
 
     <section id="result" hidden></section>
@@ -35,6 +39,7 @@
 
   <script src="/lib.js"></script>
   <script src="/tool.js"></script>
+  <script src="/pdftext.js"></script>
   <script src="/config.js"></script>
   <script src="/ai.js"></script>
   <footer class="site-footer"><a href="/">Sareva Finance Tools</a><span>tools.sareva.in</span></footer>

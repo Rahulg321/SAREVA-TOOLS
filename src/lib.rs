@@ -55,6 +55,8 @@ fn router(env: Env) -> Router {
         )
         .route("/api/call-actions", post(tools::call_actions::handler))
         .route("/api/cim-questions", post(tools::cim_questions::handler))
+        .route("/api/cim-snapshot", post(tools::cim_snapshot::handler))
+        .route("/api/memo", post(tools::memo::handler))
         .with_state(AppState {
             env: SendWrapper::new(env),
         })

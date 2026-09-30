@@ -4,9 +4,12 @@ use worker::*;
 
 use crate::error::ApiError;
 
+const EXPECTED_ACTION: &str = "ai";
+
 /// Shared protection for public AI endpoints: per-IP rate limiting plus an
-/// optional Turnstile verification. Both are inert until configured
-/// (the `RATE_LIMITER` binding and the `TURNSTILE_SECRET` secret).
+/// optional Turnstile verification. Rate limiting is inert unless the
+/// `RATE_LIMITER` binding exists; Turnstile is inert unless `TURNSTILE_SECRET`
+/// is set.
 pub async fn check(
     env: &Env,
     headers: &HeaderMap,
@@ -25,7 +28,7 @@ pub async fn check(
         }
     }
 
-    verify_turnstile(env, token).await
+    verify_turnstile(env, token, &ip).await
 }
 
 fn client_ip(headers: &HeaderMap) -> String {
@@ -41,17 +44,42 @@ fn client_ip(headers: &HeaderMap) -> String {
         .to_string()
 }
 
-async fn verify_turnstile(env: &Env, token: &str) -> Result<(), ApiError> {
+fn expected_hostnames(env: &Env) -> Vec<String> {
+    env.var("TURNSTILE_HOSTNAMES")
+        .ok()
+        .map(|v| {
+            v.to_string()
+                .split(',')
+                .map(|h| h.trim().to_string())
+                .filter(|h| !h.is_empty())
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+async fn verify_turnstile(env: &Env, token: &str, ip: &str) -> Result<(), ApiError> {
     let secret = match env.secret("TURNSTILE_SECRET") {
         Ok(secret) => secret.to_string(),
         Err(_) => return Ok(()),
     };
 
-    if token.is_empty() {
+    if token.is_empty() || token.len() > 2048 {
         return Err(ApiError::bad_request("missing Turnstile token"));
     }
 
-    let body = format!("secret={}&response={}", urlencode(&secret), urlencode(token));
+    let allowed = expected_hostnames(env);
+    if allowed.is_empty() {
+        return Err(ApiError::bad_gateway(
+            "TURNSTILE_HOSTNAMES is not configured",
+        ));
+    }
+
+    let body = format!(
+        "secret={}&response={}&remoteip={}",
+        urlencode(&secret),
+        urlencode(token),
+        urlencode(ip)
+    );
     let headers = Headers::new();
     headers
         .set("Content-Type", "application/x-www-form-urlencoded")
@@ -76,15 +104,25 @@ async fn verify_turnstile(env: &Env, token: &str) -> Result<(), ApiError> {
     #[derive(serde::Deserialize)]
     struct Verify {
         success: bool,
+        #[serde(default)]
+        action: String,
+        #[serde(default)]
+        hostname: String,
     }
     let verify: Verify =
         serde_json::from_str(&text).map_err(|_| ApiError::bad_gateway("verification failed"))?;
 
-    if verify.success {
-        Ok(())
-    } else {
-        Err(ApiError::bad_request("Turnstile verification failed"))
+    if !verify.success {
+        return Err(ApiError::bad_request("Turnstile verification failed"));
     }
+    if !allowed.iter().any(|h| h == &verify.hostname) {
+        return Err(ApiError::bad_request("Turnstile hostname not allowed"));
+    }
+    if verify.action != EXPECTED_ACTION {
+        return Err(ApiError::bad_request("Turnstile action mismatch"));
+    }
+
+    Ok(())
 }
 
 fn urlencode(value: &str) -> String {

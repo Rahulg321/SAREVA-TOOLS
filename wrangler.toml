@@ -8,6 +8,9 @@ command = "cargo install -q \"worker-build@=0.8.6\" && worker-build --release"
 [assets]
 directory = "./public"
 
+[vars]
+TURNSTILE_HOSTNAMES = "tools.sareva.in"
+
 [ai]
 binding = "AI"
 remote = true

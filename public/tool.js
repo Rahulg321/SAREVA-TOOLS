@@ -184,6 +184,7 @@
       } finally {
         button.disabled = false;
         button.textContent = label;
+        form.dispatchEvent(new Event("tool:done"));
       }
     });
   });
