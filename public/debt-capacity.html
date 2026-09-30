@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debt Capacity · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">Credit</p>
+        <h1>Debt Capacity</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">Leverage, interest and coverage with an EBITDA stress test.</p>
+
+    <form id="tool" data-endpoint="/api/debt-capacity">
+      <label>LTM EBITDA ($)
+        <input name="ebitda" type="number" step="any" value="25000000" required />
+      </label>
+      <label>Senior Debt ($)
+        <input name="senior_debt" type="number" step="any" value="50000000" required />
+      </label>
+      <label>Mezzanine ($)
+        <input name="mezzanine" type="number" step="any" value="15000000" required />
+      </label>
+      <label>Interest Rate (decimal, e.g. 0.08)
+        <input name="interest_rate" type="number" step="any" value="0.08" required />
+      </label>
+      <button type="submit">Calculate</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+</body>
+</html>

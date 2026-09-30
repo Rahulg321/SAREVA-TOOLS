@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statement Metrics · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">Analysis</p>
+        <h1>Statement Metrics</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">Margins, growth and leverage across periods, with flags.</p>
+
+    <form id="tool" data-endpoint="/api/statement-metrics">
+      <label>Periods <span class="hint">— CSV: label, revenue, gross_profit, ebitda, net_debt, fcf</span>
+        <textarea name="periods" rows="5" spellcheck="false" data-csv>2023, 100000000, 50000000, 20000000, 45000000, 14000000
+2024, 120000000, 60000000, 21600000, 40000000, 12000000</textarea>
+      </label>
+      <button type="submit">Calculate</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+</body>
+</html>

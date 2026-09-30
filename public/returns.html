@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Returns Calculator · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">Valuation</p>
+        <h1>Returns Calculator</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">MOIC, IRR and an exit-value × hold-period sensitivity grid.</p>
+
+    <form id="tool" data-endpoint="/api/returns">
+      <label>Entry Enterprise Value ($)
+        <input name="entry_ev" type="number" step="any" value="100000000" required />
+      </label>
+      <label>Entry Debt ($)
+        <input name="entry_debt" type="number" step="any" value="30000000" required />
+      </label>
+      <label>Exit Enterprise Value ($)
+        <input name="exit_ev" type="number" step="any" value="250000000" required />
+      </label>
+      <label>Exit Debt ($)
+        <input name="exit_debt" type="number" step="any" value="20000000" required />
+      </label>
+      <label>Hold Period (years)
+        <input name="hold_years" type="number" step="any" value="5" required />
+      </label>
+      <button type="submit">Calculate</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+</body>
+</html>

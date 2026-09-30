@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cap Table Waterfall · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">Equity</p>
+        <h1>Cap Table Waterfall</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">Liquidation preferences and holder proceeds at exit.</p>
+
+    <form id="tool" data-endpoint="/api/waterfall">
+      <label>Exit Value ($)
+        <input name="exit_value" type="number" step="any" value="150000000" required />
+      </label>
+      <label>Holders <span class="hint">— CSV: name, ownership (fraction), preference ($)</span>
+        <textarea name="holders" rows="5" spellcheck="false" data-csv>Founder, 0.60, 0
+Investor A, 0.25, 25000000
+Investor B, 0.15, 15000000</textarea>
+      </label>
+      <button type="submit">Calculate</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+</body>
+</html>

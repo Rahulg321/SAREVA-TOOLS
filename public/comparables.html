@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comparable Companies · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">Valuation</p>
+        <h1>Comparable Companies</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">Trading multiples, medians and an implied valuation range.</p>
+
+    <form id="tool" data-endpoint="/api/comps">
+      <label>Company Revenue ($)
+        <input name="company.revenue" type="number" step="any" value="100000000" required />
+      </label>
+      <label>Company EBITDA ($)
+        <input name="company.ebitda" type="number" step="any" value="20000000" required />
+      </label>
+      <label>Company Growth (decimal, e.g. 0.25)
+        <input name="company.growth" type="number" step="any" value="0.25" required />
+      </label>
+      <label>Comparables <span class="hint">— CSV: name, ev, revenue, ebitda, growth</span>
+        <textarea name="comps" rows="5" spellcheck="false" data-csv>Comp A, 420000000, 100000000, 23000000, 0.21
+Comp B, 510000000, 100000000, 22800000, 0.29
+Comp C, 380000000, 100000000, 22800000, 0.18</textarea>
+      </label>
+      <button type="submit">Calculate</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+</body>
+</html>

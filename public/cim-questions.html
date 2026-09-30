@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIM → Investment Questions · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">AI</p>
+        <h1>CIM → Investment Questions</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">Paste CIM text and get grouped due-diligence questions with evidence and priority.</p>
+
+    <form id="tool" data-endpoint="/api/cim-questions">
+      <label>CIM text
+        <textarea name="text" rows="10" spellcheck="false">Paste the company description, financials and notes from the CIM here. Example: B2B SaaS, US/Europe, 320 employees, recurring revenue, revenue $84.2M growing 21%, EBITDA $16.8M (20% margin), net debt $31M, DSO up 18% over two years, top 10 customers are 42% of revenue.</textarea>
+      </label>
+      <button type="submit">Generate questions</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+  <script src="/ai.js"></script>
+</body>
+</html>

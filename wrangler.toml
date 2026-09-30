@@ -1,0 +1,21 @@
+name = "finance-tools"
+main = "build/index.js"
+compatibility_date = "2026-09-30"
+
+[build]
+command = "cargo install -q \"worker-build@=0.8.6\" && worker-build --release"
+
+[assets]
+directory = "./public"
+
+[ai]
+binding = "AI"
+remote = true
+
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60

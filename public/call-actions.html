@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Call Action Items · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">AI</p>
+        <h1>Management Call → Action Items</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">Turn a call transcript into takeaways, follow-ups and red flags.</p>
+
+    <form id="tool" data-endpoint="/api/call-actions">
+      <label>Transcript
+        <textarea name="transcript" rows="8" spellcheck="false">Customer churn increased from 4% to 6% this quarter. New enterprise pipeline is $18M. Management expects a pricing increase in Q4 and is investing in a new CS team.</textarea>
+      </label>
+      <button type="submit">Summarize</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+  <script src="/ai.js"></script>
+</body>
+</html>

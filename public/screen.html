@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deal Screener · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">Screening</p>
+        <h1>Deal Screener</h1>
+      </div>
+      <div class="header-actions">
+        <span id="status" class="status" role="status" aria-label="API status" title="API status">&#9679;</span>
+        <a class="link" href="/">&larr; All tools</a>
+      </div>
+    </header>
+
+    <form id="screener">
+      <label>Company name
+        <input id="name" type="text" value="Acme Corp" />
+      </label>
+      <label>Revenue ($)
+        <input id="revenue" type="number" step="any" value="50000000" required />
+      </label>
+      <label>EBITDA ($)
+        <input id="ebitda" type="number" step="any" value="11000000" required />
+      </label>
+      <label>Growth (%)
+        <input id="growth" type="number" step="any" value="25" required />
+      </label>
+      <label>Debt ($)
+        <input id="debt" type="number" step="any" value="20000000" required />
+      </label>
+      <button type="submit">Screen</button>
+    </form>
+
+    <section id="result" hidden>
+      <h2 class="eyebrow">Result</h2>
+      <dl>
+        <dt>Revenue</dt><dd id="r-revenue">&mdash;</dd>
+        <dt>EBITDA margin</dt><dd id="r-margin">&mdash;</dd>
+        <dt>Debt / EBITDA</dt><dd id="r-leverage">&mdash;</dd>
+        <dt>Score</dt><dd id="r-score">&mdash;</dd>
+        <dt>Verdict</dt><dd id="r-verdict">&mdash;</dd>
+      </dl>
+    </section>
+
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

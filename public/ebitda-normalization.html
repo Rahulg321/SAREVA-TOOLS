@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EBITDA Normalization · Finance Tools</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card wide">
+    <header>
+      <div>
+        <p class="eyebrow">Earnings</p>
+        <h1>EBITDA Normalization</h1>
+      </div>
+      <a class="link" href="/">&larr; All tools</a>
+    </header>
+    <p class="lead">Build an adjustment ledger and normalized EBITDA.</p>
+
+    <form id="tool" data-endpoint="/api/ebitda-normalization">
+      <label>Reported EBITDA ($)
+        <input name="reported_ebitda" type="number" step="any" value="12400000" required />
+      </label>
+      <label>Adjustments <span class="hint">— CSV: label, amount ($; use negative to reduce)</span>
+        <textarea name="adjustments" rows="6" spellcheck="false" data-csv>Founder compensation, 800000
+One-time legal expense, 300000
+Office relocation, 150000
+Consulting expense, 400000
+Stock compensation, 700000</textarea>
+      </label>
+      <button type="submit">Calculate</button>
+    </form>
+
+    <section id="result" hidden></section>
+    <p id="error" class="error" hidden></p>
+  </main>
+
+  <script src="/lib.js"></script>
+  <script src="/tool.js"></script>
+</body>
+</html>
